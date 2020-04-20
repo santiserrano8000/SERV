@@ -1,0 +1,185 @@
+<ion-header>
+  <ion-navbar color="miColor">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title center>
+      <img class="tamañoImagen" src="assets/logos/logo serv.PNG" alt="">
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding style="background: #f2f1f1">
+  <h4 text-center>Paquete full Clean</h4>
+  <p class="textSeleccionaDetalles" text-center>Selecciona los detalles para cada <br> uno de los servivios</p>
+  <p>Ingresa la dirección</p> <br>
+  <agm-map [latitude]="lat" [longitude]="lng" [zoom]="16" (mapClick)="mapClicked($event)"
+    (centerChange)="mapCenterChange($event)">
+    <agm-marker [latitude]="lat2" [longitude]="lng2" [label]="labelOptions" [markerDraggable]="true"
+      iconUrl="assets/icon/pin.png" (dragEnd)="markerDragEnd( $event)"></agm-marker>
+  </agm-map>
+  <ion-list class="map-overlay list-full-border">
+    <div class="content-margin">
+      <ion-row style="background: white;  border-radius: 16px">
+        <ion-col col-4>
+          <ion-item>
+            <ion-select [(ngModel)]="calle" class="inputLogin" interface="popover">
+              <ion-option value="Calle" selected="true">Calle</ion-option>
+              <ion-option value="Carrera">Carrera</ion-option>
+              <ion-option value="Diagonal">Diagonal</ion-option>
+              <ion-option value="Transversal">Transversal</ion-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col col-2>
+          <ion-input class="inputLogin1" type="text" placeholder="127" style="" [(ngModel)]="numero1"></ion-input>
+        </ion-col>
+
+        <ion-col col-1 class=" inputLogin1 asterisco" style="">
+          #
+        </ion-col>
+
+        <ion-col col-2>
+          <ion-input class="inputLogin1" type="text" placeholder="13" style="" [(ngModel)]="numero2"></ion-input>
+        </ion-col>
+
+        <ion-col col-1 class="menos">
+          -
+        </ion-col>
+
+        <ion-col col-2>
+          <ion-input class="inputLogin1" type="text" placeholder="44" style="" [(ngModel)]="numero3"></ion-input>
+        </ion-col>
+      </ion-row>
+    </div>
+  </ion-list>
+  <button ion-button block style="background: #2a2a2a; border-radius: 16px" (click)="direccionUsuario()">Buscar
+    dirección</button>
+  <p *ngIf="datosServicio.direccion">Dirección del servicio</p>
+  <ion-card *ngIf="datosServicio.direccion">
+    <ion-grid>
+      <p text-center>{{datosServicio.direccion}}</p>
+    </ion-grid>
+  </ion-card>
+  <button *ngIf="!tengoServer" (click)="escogerServer()" class="escogeServer" ion-button block>Escoge tu server</button>
+  <button *ngIf="tengoServer" (click)="escogerServer()" class="escogeServer" ion-button block>Cambia tu server</button>
+  <p *ngIf="datosServicio.idServer" style="color: gray">Server</p>
+  <ion-card *ngIf="server.length != 0" class="card">
+    <ion-grid>
+      <ion-row>
+        <ion-col col-4>
+          <img class="profile-picture" src="{{server.foto}}" alt="">
+        </ion-col>
+        <ion-col col-8>
+          <ion-card-title class="nombre">
+            {{server.name}} {{server.apellido}}
+          </ion-card-title>
+          <div>
+            <p> {{server.frase}}</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-card>
+  <div *ngIf="datosServicio.idServer" class="fecha">
+    <p>Fecha</p>
+  </div>
+  <ion-card *ngIf="datosServicio.idServer">
+    <ion-calendar class="calendar" [(ngModel)]="datosServicio.fecha" (onChange)="onChange($event)" [type]="type"
+      [format]="'YYYY-MM-DD'">
+    </ion-calendar>
+  </ion-card>
+  <div *ngIf="datosServicio.idServer" class="fecha">
+    <p>Hora</p>
+  </div>
+  <ion-card *ngIf="datosServicio.idServer" style="margin-bottom: 42px; border-radius: 10px;">
+    <ion-list>
+      <ion-item text-wrap *ngIf="horasDisponiblesDelDia.length > 0">
+        <ion-label text-center style="color: gray; font-size: 15px; text-align: left !important;">Selecciona una hora
+        </ion-label>
+        <ion-select [(ngModel)]="datosServicio.hora">
+          <ion-option *ngFor="let hora of validarHora(horasDisponiblesDelDia)" value="{{hora}}">{{hora}}:00</ion-option>
+        </ion-select>
+      </ion-item>
+      <ion-item *ngIf="horasDisponiblesDelDia.length == 0" text-wrap text-center style="color: gray; font-size: 15px;">
+        No hay servicios disponibles en la fecha seleccionada.
+      </ion-item>
+    </ion-list>
+  </ion-card>
+  <div *ngIf="datosServicio.idServer" class="fecha">
+    <p>Servicios</p>
+  </div>
+  <ion-grid *ngIf="datosServicio.idServer">
+    <ion-row>
+      <ion-col text-center col-3>
+        <div (click)="limpieza1()">
+          <img class="imgServicios" *ngIf="!datosServicio.limpieza" src="assets/icon/limpieza-desactivado.png" alt=''>
+          <img class="imgServicios" *ngIf="datosServicio.limpieza == true" src="assets/icon/limpieza-activado.png"
+            alt=''>
+          <br>
+          <span style="font-size: 11px">Aseo General</span>
+        </div>
+      </ion-col>
+      <ion-col text-center col-3>
+        <div (click)="alimentos1()">
+          <img class="imgServicios" *ngIf="!datosServicio.alimentos" src="assets/icon/alimentos-desactivado.png" alt=''>
+          <img class="imgServicios" *ngIf="datosServicio.alimentos == true" src="assets/icon/alimentos-activado.png"
+            alt=''>
+          <br>
+          <span style="font-size: 11px">Preparación de alimentos </span>
+        </div>
+      </ion-col>
+      <ion-col text-center col-3>
+        <div (click)="lavado1()">
+          <img class="imgServicios" *ngIf="!datosServicio.lavado" src="assets/icon/lavado-desactivado.png" alt=''>
+          <img class="imgServicios" *ngIf="datosServicio.lavado == true" src="assets/icon/lavado-activado.png" alt=''>
+          <br>
+          <span style="font-size: 11px">Lavado de ropa</span>
+        </div>
+      </ion-col>
+      <ion-col text-center col-3>
+        <div (click)="planchado1()">
+          <img class="imgServicios" *ngIf="!datosServicio.planchado" src="assets/icon/planchado-desactivado.png" alt=''>
+          <img class="imgServicios" *ngIf="datosServicio.planchado == true" src="assets/icon/planchado-activado.png"
+            alt=''>
+          <br>
+          <span style="font-size: 11px">Planchado</span>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col text-center col-4>
+        <div (click)="ancianos()">
+          <img class="imgServicios" *ngIf="datosServicio.anciano" src="assets/icon/ancianos-activado.png" alt=''>
+          <img class="imgServicios" *ngIf="!datosServicio.anciano" src="assets/icon/ancianos-desactivado.png" alt=''>
+          <br>
+          <span style="font-size: 11px">Cuidado de ancianos</span>
+        </div>
+      </ion-col>
+      <ion-col text-center col-4>
+        <div (click)="mascotas()">
+          <img class="imgServicios" *ngIf="datosServicio.mascota" src="assets/icon/mascotas-activados.png" alt=''>
+          <img class="imgServicios" *ngIf="!datosServicio.mascota" src="assets/icon/mascotas-desactivado.png" alt=''>
+          <br>
+          <span style="font-size: 11px">Cuidado de mascotas</span>
+        </div>
+      </ion-col>
+      <ion-col text-center col-4>
+        <div (click)="ninos()">
+          <img class="imgServicios" *ngIf="datosServicio.nino" src="assets/icon/niños-activado.png" alt=''>
+          <img class="imgServicios" *ngIf="!datosServicio.nino" src="assets/icon/niños-desactivado.png" alt=''>
+          <br>
+          <span style="font-size: 11px">Cuidado de niños</span>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col col-4 style="display: flex; align-items: center; justify-content: center">
+        <span>Otro ¿Cuál?</span>
+      </ion-col>
+      <ion-col>
+        <ion-input [(ngModel)]="otroServicio" class="inputLogin1" color="miColor"></ion-input>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <button *ngIf="datosServicio.idServer" (click)="volver()" class="botonContinuar" ion-button block>Continuar</button>
+</ion-content>
